@@ -6,7 +6,9 @@
 
 oldfiles - Find files by time
 
-`Usage:  [-v...] ([-h|-V|-n] | {[(-a|-u) | (-m|-t) | -c] (-i | -d | -o| -y | -g) N (-\> | -\< | -\=) [-p "pat"]} )`
+Usage:
+
+`   [-v...] ([-h|-V|-n] | {[(-a|-u) | (-m|-t) | -c] (-i | -d | -o| -y | -g) N (-\> | -\< | -\=) [-p "pat"]} )`
 
 ### Options:
 
