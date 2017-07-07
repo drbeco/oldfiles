@@ -1,0 +1,267 @@
+#!/bin/bash
+
+# **************************************************************************
+# * (C)opyright 2017         by Ruben Carlo Benante                        *
+# *                                                                        *
+# * This program is free software; you can redistribute it and/or modify   *
+# *  it under the terms of the GNU General Public License as published by  *
+# *  the Free Software Foundation version 2 of the License.                *
+# *                                                                        *
+# * This program is distributed in the hope that it will be useful,        *
+# *  but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *  GNU General Public License for more details.                          *
+# *                                                                        *
+# * You should have received a copy of the GNU General Public License      *
+# *  along with this program; if not, write to the                         *
+# *  Free Software Foundation, Inc.,                                       *
+# *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+# *                                                                        *
+# * Contact author at:                                                     *
+# *  Ruben Carlo Benante                                                   *
+# *  rcb@beco.cc                                                           *
+# **************************************************************************
+
+Help()
+{
+    cat << EOF
+    oldfiles - Find files by time
+    Usage: ${1} [-v...] ([-h|-V|-n] | {[(-a|-u) | (-m|-t) | -c] (-i | -d | -o| -y | -g) N (-\> | -\< | -\=) [-p "pat"]} )
+
+    Options:
+        Help & Info:
+            -h, --help       Show this help.
+            -V, --version    Show version.
+            -v, --verbose    Turn verbose mode on (cumulative).
+            -n, --dry-run    Do not run, just explain how to create a "find" command
+        Time type (access/use, modification time or changed status):
+            -a or -u        access time (or use time)
+            -m or -t        modification time (default)
+            -c              status change
+        Time range (where N is a positive integer):
+            -i N            minutes (default, with N equal 1 min)
+            -d N            days
+            -o N            months
+            -y N            years
+            -g N            N is a DATE (example: "2017-07-06 22:17:15")
+        Tests:
+            -p "pat"        optional pattern to match (example: -p "*.c" to find c files) (default -p "*")
+            -\>             file is newer than given range, ie, time modified after it.
+            -\<             file is older than given range, ie, time is from before it. (default)
+            -\=             file that is exactly N (min, day, month, year) old.
+
+    Exit status:
+       0, if ok.
+       1, some error occurred.
+
+    Todo:
+            Long options not implemented yet.
+
+    Author:
+            Written by Ruben Carlo Benante <rcb@beco.cc>
+
+EOF
+    exit 1
+}
+
+Copyr()
+{
+    echo 'oldfiles - 20170706.202054'
+    echo
+    echo 'Copyright (C) 2017 Ruben Carlo Benante <rcb@beco.cc>, GNU GPL version 2'
+    echo '<http://gnu.org/licenses/gpl.html>. This  is  free  software:  you are free to change and'
+    echo 'redistribute it. There is NO WARRANTY, to the extent permitted by law. USE IT AS IT IS. The author'
+    echo 'takes no responsability to any damage this software may inflige in your data.'
+    echo
+    exit 1
+}
+
+# Example of a function
+main()
+{
+    vrb=0
+    typ="m"
+    rng="i"
+    tst="<"
+    siz=1
+    pat="*"
+    dry=""
+    #getopt example with switch/case
+    while getopts "hVvaumtci:d:o:y:g:><=p:n" FLAG; do
+        case "$FLAG" in
+            h) # Help
+                Help
+                ;;
+            V) # Copyright
+                Copyr
+                ;;
+            v) # Verbose level
+                let vrb=vrb+1
+                ;;
+            n) # Dry run
+                dry="-n"
+                ;;
+            a|u) #access/use time
+                typ="a"
+                tls="ltu"
+                ;;
+            m|t) #modification time
+                typ="m"
+                tls="lt"
+                ;;
+            c) #status change time
+                typ="c"
+                tls="ltc"
+                ;;
+            i|d|o|y|g) # range
+                rng="$FLAG"
+                siz="$OPTARG"
+                ;;
+            \>|\<|\=) # test
+                tst="$FLAG"
+                ;;
+            p) # pattert
+                pat="$OPTARG"
+                ;;
+            *)
+                Help
+                ;;
+        esac
+    done
+  
+    if [ "$rng" != "g" ] && [ "$siz" -gt "500" ]; then
+        echo "Restriction: max size 500 (years, months, days or minutes)"
+        exit 1
+    fi
+
+    #repeat char 'v' $vrb times
+    svrb=`printf '%.sv' $(seq $vrb)`
+ 
+    if [ "$vrb" -gt "1" ]; then
+        echo "Starting oldfiles script, by beco, version 20170706.202054..."
+        echo "$ oldfiles -$svrb -$typ -$rng $siz -p \"$pat\" -\\$tst $dry"
+    fi
+
+    if [ "$vrb" -gt "2" ]; then
+        echo -n "Looking for "
+        if [ "$pat" = "*" ]; then
+            echo -n "all (*) "
+        else
+            echo -n "\"$pat\" "
+        fi
+        echo -n "files with "
+        case "$typ" in
+            a) # access / use 
+                echo -n "(a)ccess time "
+                ;;
+            m) # modification time
+                echo -n "(m)odification time "
+                ;;
+            c) # inode status change time
+                echo -n "inode status (c)hange time "
+        esac
+        case "$tst" in
+            \<) # older
+                echo -n "older than "
+                ;;
+            \>) # newer
+                echo -n "newer than "
+                ;;
+            \=) # equal
+                echo -n "equal to "
+                ;;
+        esac
+        case "$rng" in
+            i) # minutes
+                echo "$siz minute(s)"
+                ;;
+            d) # days
+                echo "$siz day(s)"
+                ;;
+            o) # months
+                echo "$siz month(s)"
+                ;;
+            y) # years
+                echo "$siz year(s)"
+                ;;
+            g) # date
+                echo "date $siz"
+                ;;
+        esac
+    fi
+
+    #$typ -a, -m -c
+    #$rng -i = min, -d = time, -o time*30, -y time*365, -g DATE
+    #$siz = value or DATE
+
+    if [ "$rng" != "g" ]; then
+        ype="time"
+        if [ "$rng" = "i" ]; then
+            ype="min"
+        fi
+
+        dir="" #"="
+        if [ "$tst" = "<" ]; then
+            dir="+"
+        fi
+        if [ "$tst" = ">" ]; then
+            dir="-"
+        fi
+
+        clc="$siz"
+        if [ "$rng" = "o" ]; then
+            clc=$((siz * 30))
+        fi
+        if [ "$rng" = "y" ]; then
+            clc=$((siz * 365))
+        fi
+
+        if [ "$vrb" -gt "0" -o "${dry}" = "-n" ]; then
+            echo find . -name \"$pat\" -type f -"$typ""$ype" "${dir}""$clc" -exec ls -"$tls" --time-style=long-iso {} +
+        fi
+        if [ -z "${dry}" ]; then 
+            find . -name "$pat" -type f -"$typ""$ype" "${dir}""$clc" -exec ls -"$tls" --time-style=long-iso {} +
+        fi
+
+    else # -g DATE
+        if [ "$tst" = "=" ]; then
+            clc0=$(date +'%F' -d"$siz")
+            clci=$(date +'%F %T' -d"$clc0 -1 seconds")
+            clc1=$(date +'%F' -d"$clc0 +1 days")
+            clcf=$(date +'%F %T' -d"$clc1 -1 seconds")
+            if [ "$vrb" -gt "1" ]; then
+                echo From: $clci To: $clcf
+            fi
+            if [ "$vrb" -gt "0" -o "${dry}" = "-n" ]; then
+                echo find . -name \"$pat\" -type f -newer"$typ"t \"$clci\" ! -newer"$typ"t \"$clcf\" -exec ls -"$tls" --time-style=long-iso {} +
+            fi
+            if [ -z "${dry}" ]; then 
+                find . -name "$pat" -type f -newer"$typ"t "$clci" ! -newer"$typ"t "$clcf" -exec ls -"$tls" --time-style=long-iso {} +
+            fi
+        else
+            dir=""
+            if [ "$tst" = "<" ]; then
+                dir="!"
+            fi
+            if [ "$vrb" -gt "0" -o "${dry}" = "-n" ]; then
+                echo find . -name \"$pat\" -type f ${dir} -newer"$typ"t \"$siz\" -exec ls -"$tls" --time-style=long-iso {} +
+            fi
+            if [ -z "${dry}" ]; then 
+                find . -name "$pat" -type f ${dir} -newer"$typ"t "$siz" -exec ls -"$tls" --time-style=long-iso {} +
+            fi
+        fi
+    fi
+
+    if [ "${dry}" = "-n" ] && [ "$vrb" -gt "0" ]; then
+        echo "Dry-run"
+    fi
+}
+
+#Calling main with all args
+main "$@"
+exit 0
+
+#/* -------------------------------------------------------------------------- */
+#/* vi: set ai et ts=4 sw=4 tw=0 wm=0 fo=croql : SHELL config for Vim modeline */
+#/* Template by Dr. Beco <rcb at beco dot cc> Version 20160714.124739          */
+
