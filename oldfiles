@@ -66,7 +66,7 @@ EOF
 
 Copyr()
 {
-    echo 'oldfiles - 20170706.202054'
+    echo 'oldfiles - v1.0.20170706.202054'
     echo
     echo 'Copyright (C) 2017 Ruben Carlo Benante <rcb@beco.cc>, GNU GPL version 2'
     echo '<http://gnu.org/licenses/gpl.html>. This  is  free  software:  you are free to change and'
@@ -138,7 +138,7 @@ main()
     svrb=`printf '%.sv' $(seq $vrb)`
  
     if [ "$vrb" -gt "1" ]; then
-        echo "Starting oldfiles script, by beco, version 20170706.202054..."
+        echo "Starting oldfiles script, by beco, version v1.0.20170706.202054..."
         echo "$ oldfiles -$svrb -$typ -$rng $siz -p \"$pat\" -\\$tst $dry"
     fi
 
