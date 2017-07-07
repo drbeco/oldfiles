@@ -1,6 +1,6 @@
 # oldfiles
 
-    A bash script that helps "find" files of certain age, and explains the "find" command it uses!￼Edit
+    A bash script that helps "find" files of certain age, and explains the "find" command it uses!
 
 # How to use
 
