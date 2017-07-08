@@ -26,39 +26,42 @@ Help()
 {
     cat << EOF
     oldfiles - Find files by time
-    Usage: ${1} [-v...] ([-h|-V|-n] | {[(-a|-u) | (-m|-t) | -c] (-i | -d | -o| -y | -g) N (-\> | -\< | -\=) [-p "pat"]})
 
-    Options:
-        Help & Info:
-            -h, --help       Show this help.
-            -V, --version    Show version.
-            -v, --verbose    Turn verbose mode on (cumulative).
-            -n, --dry-run    Do not run, just explain how to create a "find" command
-        Time type (access/use, modification time or changed status):
-            -a or -u        access time (or use time)
-            -m or -t        modification time (default)
-            -c              status change
-        Time range (where N is a positive integer):
-            -i N            minutes (default, with N equal 1 min)
-            -d N            days
-            -o N            months
-            -y N            years
-            -g N            N is a DATE (example: "2017-07-06 22:17:15")
-        Tests:
-            -p "pat"        optional pattern to match (example: -p "*.c" to find c files) (default -p "*")
-            -\>             file is newer than given range, ie, time modified after it.
-            -\<             file is older than given range, ie, time is from before it. (default)
-            -\=             file that is exactly N (min, day, month, year) old.
+    * Usage:  
+      ${1} [-v...] ([-h|-V|-n] | {[(-a|-u) | (-m|-t) | -c] (-i | -d | -o| -y | -g) N (-\> | -\< | -\=) [-p "pat"]})
 
-    Exit status:
-       0, if ok.
-       1, some error occurred.
+    * Options:
+        * Help & Info:
+            -h, --help       Show this help.  
+            -V, --version    Show version.  
+            -v, --verbose    Turn verbose mode on (cumulative).  
+            -n, --dry-run    Do not run, just explain how to create a "find" command.  
+        * Time type (access/use, modification time or changed status):
+            -a or -u        access (use) time  
+            -m or -t        modification time (default)  
+            -c              status change  
+        * Time range (where N is a positive integer):
+            -i N            minutes (default, with N equal 1 min)  
+            -d N            days  
+            -o N            months  
+            -y N            years  
+            -g N            N is a DATE (example: "2017-07-06 22:17:15")  
+        * Tests:
+            -p "pat"        optional pattern to match (example: -p "*.c" to find c files) (default -p "*")  
+            -\>             file is newer than given range, ie, time modified after it.  
+            -\<             file is older than given range, ie, time is from before it. (default)  
+            -\=             file that is exactly N (min, day, month, year) old.  
 
-    Todo:
-            Long options not implemented yet.
+    * Exit status:
+         0, if ok.  
+         1, some error occurred.  
 
-    Author:
-            Written by Ruben Carlo Benante <rcb@beco.cc>
+    * Todo:
+         Long options not implemented yet.
+
+    * Author:
+         Copyright (C) 2017 by Ruben Carlo Benante <rcb@beco.cc>  
+         Date: 2017-07-07
 
 EOF
     exit 1
@@ -79,13 +82,16 @@ Copyr()
 # Example of a function
 main()
 {
-    vrb=0
-    typ="m"
-    rng="i"
-    tst="<"
-    siz=1
-    pat="*"
-    dry=""
+    # Default variable values
+    vrb=0    # no verbosity
+    typ="m"  # modification time
+    tls="lt" # ls -lt (show and sort by modification time)
+    rng="i"  # range units: minutes
+    tst="<"  # test: older
+    siz=1    # range value: 1 (minute)
+    pat="*"  # pattern: all files
+    dry=""   # run (no dry-run)
+
     #getopt example with switch/case
     while getopts "hVvaumtci:d:o:y:g:><=p:n" FLAG; do
         case "$FLAG" in
